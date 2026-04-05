@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 *.exe
+packages/timing-loader/timing-loader
 
 # Environment & secrets
 .env
