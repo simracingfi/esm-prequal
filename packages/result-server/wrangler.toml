@@ -1,0 +1,9 @@
+name = "esm-prequal-server"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "esm-prequal-db"
+database_id = "placeholder-replace-after-d1-create"
+migrations_dir = "migrations"
