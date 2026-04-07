@@ -1,10 +1,9 @@
-.PHONY: build build-windows clean
+.PHONY: build clean
 
+build: export GOOS=windows
+build: export GOARCH=amd64
 build:
-	go build -o esm-loader .
-
-build-windows:
-	GOOS=windows GOARCH=amd64 go build -o esm-loader.exe .
+	go build -o esm-loader.exe .
 
 clean:
-	rm -f esm-loader esm-loader.exe
+	rm -f esm-loader.exe
