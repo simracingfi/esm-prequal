@@ -4,7 +4,7 @@ React single-page app that displays live qualifying standings. Polls the result 
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 18+ ([nvm-windows](https://github.com/coreybutler/nvm-windows) Recommended)
 
 ## Setup
 
