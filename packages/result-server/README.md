@@ -4,7 +4,7 @@ Cloudflare Workers REST API backed by D1 (SQLite). Receives lap time batches fro
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 18+ ([nvm-windows](https://github.com/coreybutler/nvm-windows) Recommended)
 - A [Cloudflare account](https://dash.cloudflare.com/sign-up) (free tier is sufficient)
 - `wrangler` CLI (installed as a dev dependency)
 
@@ -41,6 +41,13 @@ Enter a strong random secret when prompted. The timing loader must be started wi
 
 ## Development
 
+Apply the database migration locally before the first run:
+
+```sh
+npm run db:migrate:local
+```
+
+Create `.dev.vars` with `API_KEY=<key for local testing>` in it.
 Start a local dev server (uses a local D1 replica):
 
 ```sh
@@ -49,12 +56,6 @@ npm run dev
 ```
 
 The server listens on `http://localhost:8787` by default.
-
-Apply the database migration locally before the first run:
-
-```sh
-npm run db:migrate:local
-```
 
 ### Testing with curl
 
@@ -70,6 +71,9 @@ curl -X POST http://localhost:8787/api/laptimes \
       {"driverId": 123456, "driverName": "Alice Driver", "sessionId": 99, "lapNumber": 2, "lapTime": null}
     ]
   }'
+
+# ...or on PowerShell
+Invoke-RestMethod http://localhost:8787/api/laptimes -Method POST -Headers @{"X-API-Key"="your-dev-key"} -ContentType application/json -Body '...'
 
 # GET standings
 curl "http://localhost:8787/api/standings?competition=Test+Event"
