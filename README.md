@@ -30,6 +30,7 @@ A specialized iRacing live timing app for hotlap qualification competitions. Ope
 | Package | Language | Purpose |
 |---------|----------|---------|
 | [`packages/timing-loader`](packages/timing-loader/) | Go | Reads iRacing telemetry on Windows, POSTs lap time batches to the server every 10 seconds |
+| [`packages/timing-loader-py`](packages/timing-loader-py/) | Python | Alternative timing loader using pyirsdk (same functionality, single-file) |
 | [`packages/result-server`](packages/result-server/) | TypeScript | Cloudflare Workers REST API with D1 (SQLite) storage |
 | [`packages/result-client`](packages/result-client/) | TypeScript / React | Single-page app that polls the server and displays live standings |
 
@@ -64,9 +65,10 @@ All routes are under `/api`. The POST route requires an `X-API-Key` header.
 ```
 esm-prequal/
 ├── packages/
-│   ├── timing-loader/   # Go CLI (Windows single-exe)
-│   ├── result-server/   # Cloudflare Worker
-│   └── result-client/   # Vite React SPA
+│   ├── timing-loader/      # Go CLI (Windows single-exe)
+│   ├── timing-loader-py/   # Python alternative (pyirsdk)
+│   ├── result-server/      # Cloudflare Worker
+│   └── result-client/      # Vite React SPA
 └── .gitignore
 ```
 
