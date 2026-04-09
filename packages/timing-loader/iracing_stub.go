@@ -18,6 +18,10 @@ func (c *stubIRacingClient) IsConnected() bool {
 	return false
 }
 
+func (c *stubIRacingClient) GetInitialLaps() ([]Laptime, error) {
+	return nil, fmt.Errorf("not available on this platform")
+}
+
 func (c *stubIRacingClient) GetSessionID() (int, error) {
 	return 0, fmt.Errorf("not available on this platform")
 }

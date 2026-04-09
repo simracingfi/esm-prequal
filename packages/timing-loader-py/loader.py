@@ -31,6 +31,46 @@ def send_batch(server_url, api_key, competition, laptimes):
     print(f"Sent {len(laptimes)} laptimes, {result.get('inserted', 0)} inserted")
 
 
+def collect_initial_laps(ir):
+    """Read session results to recover each driver's best lap (for mid-session starts)."""
+    weekend_info = ir["WeekendInfo"]
+    driver_info = ir["DriverInfo"]
+    session_info = ir["SessionInfo"]
+    if not weekend_info or not driver_info or not session_info:
+        return []
+
+    session_id = weekend_info["SubSessionID"]
+    session_num = ir["SessionNum"]
+    sessions = session_info.get("Sessions", [])
+    if session_num is None or session_num < 0 or session_num >= len(sessions):
+        return []
+
+    results = sessions[session_num].get("ResultsPositions") or []
+    drivers_by_car_idx = {}
+    for d in driver_info["Drivers"]:
+        if d.get("CarIsPaceCar", 0) > 0 or d.get("IsSpectator", 0) > 0:
+            continue
+        drivers_by_car_idx[d["CarIdx"]] = d
+
+    laptimes = []
+    for r in results:
+        d = drivers_by_car_idx.get(r.get("CarIdx"))
+        if not d:
+            continue
+        fastest_time = r.get("FastestTime", 0)
+        fastest_lap = r.get("FastestLap", 0)
+        if fastest_time > 0 and fastest_lap > 0:
+            laptimes.append({
+                "driverId": d["UserID"],
+                "driverName": d["UserName"].strip(),
+                "sessionId": session_id,
+                "lapNumber": fastest_lap,
+                "lapTime": fastest_time,
+            })
+
+    return laptimes
+
+
 def collect_laptimes(ir):
     """Read current lap data from iRacing telemetry."""
     weekend_info = ir["WeekendInfo"]
@@ -94,6 +134,17 @@ def main():
                     time.sleep(args.interval)
                     continue
                 print("Connected to iRacing!")
+
+                # On connect, recover each driver's best lap from session results
+                initial = collect_initial_laps(ir)
+                if initial:
+                    print(f"Recovered {len(initial)} best laps from session results")
+                    try:
+                        send_batch(args.server, args.apikey, args.competition, initial)
+                        for lt in initial:
+                            sent.add((lt["driverId"], lt["sessionId"], lt["lapNumber"]))
+                    except (urllib.error.URLError, OSError) as e:
+                        print(f"Error sending initial laps: {e}")
 
             laptimes = collect_laptimes(ir)
 

@@ -12,6 +12,10 @@ type IRacingClient interface {
 	// GetSessionID returns the current iRacing subsession ID.
 	GetSessionID() (int, error)
 
+	// GetInitialLaps reads session results to recover each driver's best lap.
+	// Called once after connecting to handle mid-session starts.
+	GetInitialLaps() ([]Laptime, error)
+
 	// GetLaptimes reads all available lap time data from the current session.
 	// Returns lap times for all drivers in the session.
 	GetLaptimes() ([]Laptime, error)

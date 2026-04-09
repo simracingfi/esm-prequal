@@ -46,6 +46,65 @@ func (c *windowsIRacingClient) GetSessionID() (int, error) {
 	return yaml.WeekendInfo.SubSessionID, nil
 }
 
+func (c *windowsIRacingClient) GetInitialLaps() ([]Laptime, error) {
+	if c.sdk == nil {
+		return nil, fmt.Errorf("not connected")
+	}
+
+	yamlData := c.sdk.GetLatestYaml()
+	sessionID := yamlData.WeekendInfo.SubSessionID
+
+	// Find current session number from telemetry
+	sessionNum, err := c.sdk.GetIntValue("SessionNum")
+	if err != nil {
+		return nil, fmt.Errorf("could not read SessionNum: %w", err)
+	}
+
+	// Look up results for the current session
+	sessions := yamlData.SessionInfo.Sessions
+	if int(sessionNum) < 0 || int(sessionNum) >= len(sessions) {
+		return nil, nil
+	}
+	results := sessions[sessionNum].ResultsPositions
+
+	// Build a CarIdx -> Driver lookup
+	driverByCarIdx := make(map[int]*struct {
+		UserID   int
+		UserName string
+	})
+	for i := range yamlData.DriverInfo.Drivers {
+		d := &yamlData.DriverInfo.Drivers[i]
+		if d.CarIsPaceCar > 0 || d.IsSpectator > 0 {
+			continue
+		}
+		driverByCarIdx[d.CarIdx] = &struct {
+			UserID   int
+			UserName string
+		}{d.UserID, strings.TrimSpace(d.UserName)}
+	}
+
+	var laptimes []Laptime
+	for _, r := range results {
+		d, ok := driverByCarIdx[r.CarIdx]
+		if !ok {
+			continue
+		}
+		// Send the driver's best lap if available
+		if r.FastestTime > 0 && r.FastestLap > 0 {
+			ft := r.FastestTime
+			laptimes = append(laptimes, Laptime{
+				DriverID:   d.UserID,
+				DriverName: d.UserName,
+				SessionID:  sessionID,
+				LapNumber:  r.FastestLap,
+				LapTime:    &ft,
+			})
+		}
+	}
+
+	return laptimes, nil
+}
+
 func (c *windowsIRacingClient) GetLaptimes() ([]Laptime, error) {
 	if c.sdk == nil {
 		return nil, fmt.Errorf("not connected")

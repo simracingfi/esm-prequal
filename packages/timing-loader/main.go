@@ -52,6 +52,19 @@ func main() {
 					continue
 				}
 				fmt.Println("Connected to iRacing!")
+
+				// On connect, recover each driver's best lap from session results
+				if initial, err := client.GetInitialLaps(); err == nil && len(initial) > 0 {
+					fmt.Printf("Recovered %d best laps from session results\n", len(initial))
+					batch := LaptimeBatch{Competition: *competition, Laptimes: initial}
+					if err := sendBatch(*serverURL, *apiKey, batch); err != nil {
+						fmt.Printf("Error sending initial laps: %v\n", err)
+					} else {
+						for _, lt := range initial {
+							sentLaps[lapKey{lt.DriverID, lt.SessionID, lt.LapNumber}] = true
+						}
+					}
+				}
 			}
 
 			laptimes, err := client.GetLaptimes()
