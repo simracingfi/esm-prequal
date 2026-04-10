@@ -7,3 +7,18 @@ binding = "DB"
 database_name = "esm-prequal-db"
 database_id = "placeholder-replace-after-d1-create"
 migrations_dir = "migrations"
+
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = false
+head_sampling_rate = 1
+persist = false
+invocation_logs = true
+
+[observability.traces]
+enabled = false
+persist = false
+head_sampling_rate = 1
