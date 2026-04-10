@@ -9,7 +9,7 @@ interface Props {
 
 export function CompetitionPicker({ selected, onSelect }: Props) {
   const fetcher = useCallback(() => fetchCompetitions(), []);
-  const { data: competitions, loading } = usePolling(fetcher, 10000);
+  const { data: competitions, loading } = usePolling(fetcher, 15*60*1000);
 
   if (loading) return <div>Ladataan kilpailuja...</div>;
   if (!competitions || competitions.length === 0) {
