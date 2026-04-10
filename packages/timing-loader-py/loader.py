@@ -8,7 +8,6 @@ import urllib.error
 
 import irsdk
 
-
 def parse_args():
     p = argparse.ArgumentParser(description="eSM Prequal Timing Loader")
     p.add_argument("--competition", required=True, help="Competition name")
@@ -22,11 +21,12 @@ def send_batch(server_url, api_key, competition, laptimes):
     """POST a batch of lap times to the result server."""
     payload = json.dumps({"competition": competition, "laptimes": laptimes}).encode()
     req = urllib.request.Request(
-        f"{server_url}/api/laptimes",
+        method="POST",
+        url=f"{server_url}/api/laptimes",
         data=payload,
-        headers={"Content-Type": "application/json", "X-API-Key": api_key},
+        headers={"Content-Type": "application/json", "X-API-Key": api_key, "User-Agent": "eSM Prequal Timing Loader/1.0"},
     )
-    with urllib.request.urlopen(req, timeout=30) as resp:
+    with urllib.request.urlopen(req, timeout=10) as resp:
         result = json.loads(resp.read())
     print(f"Sent {len(laptimes)} laptimes, {result.get('inserted', 0)} inserted")
 
@@ -147,6 +147,8 @@ def main():
                         print(f"Error sending initial laps: {e}")
 
             laptimes = collect_laptimes(ir)
+            if not laptimes:
+                print("No active laps in telemetry")
 
             new_laps = []
             for lt in laptimes:
