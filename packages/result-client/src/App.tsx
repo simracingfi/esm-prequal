@@ -10,8 +10,13 @@ export function App() {
   const [view, setView] = useState<View>("standings");
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", padding: "1rem" }}>
-      <h1>eSM Prequal - Live Timing</h1>
+    <div className="content">
+      <img
+        src="https://simracing.fi/kuvat/logo_FISRA_plaincolor.png"
+        alt="FiSRA logo"
+        style={{ height: "80px", float: "right" }}
+      />
+      <h1>eSM esikarsinta - reaaliaikainen tulospalvelu</h1>
       <div style={{ marginBottom: "1rem" }}>
         <CompetitionPicker selected={competition} onSelect={setCompetition} />
       </div>
@@ -22,13 +27,13 @@ export function App() {
               onClick={() => setView("standings")}
               disabled={view === "standings"}
             >
-              Standings
+              Tulokset
             </button>{" "}
             <button
               onClick={() => setView("laptimes")}
               disabled={view === "laptimes"}
             >
-              All Laps
+              Kaikki kierrokset
             </button>
           </nav>
           {view === "standings" ? (

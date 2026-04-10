@@ -11,9 +11,9 @@ export function CompetitionPicker({ selected, onSelect }: Props) {
   const fetcher = useCallback(() => fetchCompetitions(), []);
   const { data: competitions, loading } = usePolling(fetcher, 10000);
 
-  if (loading) return <div>Loading competitions...</div>;
+  if (loading) return <div>Ladataan kilpailuja...</div>;
   if (!competitions || competitions.length === 0) {
-    return <div>No competitions found.</div>;
+    return <div>Ei löytynyt kilpailuja.</div>;
   }
 
   return (
@@ -22,7 +22,7 @@ export function CompetitionPicker({ selected, onSelect }: Props) {
       onChange={(e) => onSelect(e.target.value)}
     >
       <option value="" disabled>
-        Select competition
+        Valitse kilpailu
       </option>
       {competitions.map((c) => (
         <option key={c} value={c}>

@@ -22,20 +22,20 @@ export function LaptimesTable({ competition }: Props) {
   );
   const { data: laptimes, loading, error } = usePolling(fetcher);
 
-  if (loading) return <div>Loading lap times...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div>Ladataan kierrosaikoja...</div>;
+  if (error) return <div>Virhe: {error}</div>;
   if (!laptimes || laptimes.length === 0) {
-    return <div>No lap times yet.</div>;
+    return <div>Ei vielä kierrosaikoja.</div>;
   }
 
   return (
     <table>
       <thead>
         <tr>
-          <th>Driver</th>
-          <th>Session</th>
-          <th>Lap</th>
-          <th>Time</th>
+          <th>Kuljettaja</th>
+          <th>Sessio</th>
+          <th>Kierros</th>
+          <th>Aika</th>
         </tr>
       </thead>
       <tbody>
