@@ -82,7 +82,7 @@ def collect_laptimes(ir):
     drivers = driver_info["Drivers"]
 
     ir.freeze_var_buffer_latest()
-    car_idx_lap = ir["CarIdxLap"]
+    car_idx_lap = ir["CarIdxLapCompleted"]
     car_idx_last_lap_time = ir["CarIdxLastLapTime"]
     ir.unfreeze_var_buffer_latest()
 
