@@ -10,7 +10,7 @@ A specialized iRacing live timing app for hotlap qualification competitions. Ope
 │                         │        │                              │
 │  ┌───────────────────┐  │ HTTPS  │  ┌────────────────────────┐  │
 │  │  timing-loader    │──┼───────▶│  │    result-server       │  │
-│  │  (Go binary)      │  │ POST   │  │    (Hono REST API)     │  │
+│  │  (Python app)     │  │ POST   │  │    (Hono REST API)     │  │
 │  └───────────────────┘  │        │  └────────────────────────┘  │
 │                         │        │           │                  │
 └─────────────────────────┘        │    ┌──────▼──────┐           │
@@ -29,9 +29,8 @@ A specialized iRacing live timing app for hotlap qualification competitions. Ope
 
 | Package | Language | Purpose |
 |---------|----------|---------|
-| [`packages/timing-loader`](packages/timing-loader/) | Go | Reads iRacing telemetry on Windows, POSTs lap time batches to the server every 10 seconds |
-| [`packages/timing-loader-py`](packages/timing-loader-py/) | Python | Alternative timing loader using pyirsdk (same functionality, single-file) |
-| [`packages/result-server`](packages/result-server/) | TypeScript | Cloudflare Workers REST API with D1 (SQLite) storage |
+| [`packages/timing-loader-py`](packages/timing-loader-py/) | Python | Reads iRacing telemetry on Windows, POSTs lap time batches to the server |
+| [`packages/result-server`](packages/result-server/) | TypeScript | Laptime backend, a Cloudflare Workers REST API with D1 (SQLite) storage |
 | [`packages/result-client`](packages/result-client/) | TypeScript / React | Single-page app that polls the server and displays live standings |
 
 ## Data Model
@@ -65,10 +64,9 @@ All routes are under `/api`. The POST route requires an `X-API-Key` header.
 ```
 esm-prequal/
 ├── packages/
-│   ├── timing-loader/      # Go CLI (Windows single-exe)
-│   ├── timing-loader-py/   # Python alternative (pyirsdk)
-│   ├── result-server/      # Cloudflare Worker
-│   └── result-client/      # Vite React SPA
+│   ├── timing-loader-py/   # Laptime data collector (pyirsdk)
+│   ├── result-server/      # Laptime backend (Cloudflare Worker)
+│   └── result-client/      # Standings browser (Vite React SPA)
 └── .gitignore
 ```
 
@@ -78,7 +76,7 @@ The Go and TypeScript packages are independent — there is no shared workspace 
 
 1. **Deploy the server** — see [`packages/result-server`](packages/result-server/README.md)
 2. **Start the client** — see [`packages/result-client`](packages/result-client/README.md)
-3. **Run the loader on the race PC** — see [`packages/timing-loader`](packages/timing-loader/README.md)
+3. **Run the loader on the race PC** — see [`packages/timing-loader-py`](packages/timing-loader-py/README.md)
 
 ## TODO
 
