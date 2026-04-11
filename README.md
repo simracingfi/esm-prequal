@@ -17,7 +17,7 @@ A specialized iRacing live timing app for hotlap qualification competitions. Ope
                                    │    │  D1 SQLite  │           │
 ┌─────────────────────────┐        │    └─────────────┘           │
 │   Browser / Any Device  │  HTTPS │                              │
-│                         │◀───────┼──────────────────────────────│
+│                         │◀───────┼                              │
 │  ┌───────────────────┐  │  GET   │                              │
 │  │  result-client    │  │        └──────────────────────────────┘
 │  │  (React SPA)      │  │
@@ -79,3 +79,17 @@ The Go and TypeScript packages are independent — there is no shared workspace 
 1. **Deploy the server** — see [`packages/result-server`](packages/result-server/README.md)
 2. **Start the client** — see [`packages/result-client`](packages/result-client/README.md)
 3. **Run the loader on the race PC** — see [`packages/timing-loader`](packages/timing-loader/README.md)
+
+## TODO
+
+- Highlight fresh times
+- Show drivers without time
+- Insert list of all drivers with null laptimes
+- Hardcode last season champion to position 27 (unless higher already)
+- Truncate decimals from times, don't round
+- FiSRA colors, fonts
+- Predict cutoff
+
+## Known Issues
+
+- Live collected results from timing-loader-py repeat the best laptime so far if laptime didn't improve. Looks like this could be a bug in iRacing SDK.

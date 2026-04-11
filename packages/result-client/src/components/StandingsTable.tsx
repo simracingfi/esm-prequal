@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { fetchStandings, type StandingEntry } from "../api/client";
 import { usePolling } from "../hooks/usePolling";
+import { formatTime } from "../api/formatTime";
 
 function getHeat(position: number, total: number): string {
   if (position <= 27) return "A";
@@ -22,14 +23,6 @@ function getHeat(position: number, total: number): string {
     return "D";
   }
   return "Ei erää";
-}
-
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return mins > 0
-    ? `${mins}:${secs.toFixed(3).padStart(6, "0")}`
-    : secs.toFixed(3);
 }
 
 interface Props {

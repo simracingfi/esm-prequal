@@ -1,15 +1,7 @@
 import { useCallback } from "react";
 import { fetchLaptimes, type LaptimeRow } from "../api/client";
 import { usePolling } from "../hooks/usePolling";
-
-function formatTime(seconds: number | null): string {
-  if (seconds === null) return "Invalid";
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return mins > 0
-    ? `${mins}:${secs.toFixed(3).padStart(6, "0")}`
-    : secs.toFixed(3);
-}
+import { formatTime } from "../api/formatTime";
 
 interface Props {
   competition: string;
