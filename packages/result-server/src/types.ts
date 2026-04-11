@@ -32,6 +32,7 @@ export interface StandingEntry {
   driverName: string;
   bestTime: number;
   lapCount: number;
+  bestTimeAt: string;
 }
 
 export interface Env {

@@ -1,7 +1,22 @@
-import { useCallback } from "react";
+import { useCallback, type CSSProperties } from "react";
 import { fetchStandings, type StandingEntry } from "../api/client";
 import { usePolling } from "../hooks/usePolling";
 import { formatTime } from "../api/formatTime";
+
+function getFreshnessStyle(bestTimeAt: string | undefined): CSSProperties {
+  if (!bestTimeAt) return {};
+  // SQLite stores timestamps as "YYYY-MM-DD HH:MM:SS" (UTC); browsers need ISO 8601 with T+Z
+  const isoStr = bestTimeAt.includes("T") ? bestTimeAt : bestTimeAt.replace(" ", "T") + "Z";
+  const ageSeconds = (Date.now() - new Date(isoStr).getTime()) / 1000;
+  const MAX_AGE = 3600; // 1 hour → no highlight
+  const PEAK_AGE = 120; // 2 minutes → full highlight
+  if (ageSeconds > MAX_AGE) return {};
+  const intensity =
+    ageSeconds <= PEAK_AGE
+      ? 1
+      : 1 - (ageSeconds - PEAK_AGE) / (MAX_AGE - PEAK_AGE);
+  return { backgroundColor: `rgba(51, 122, 183, ${(intensity * 0.5).toFixed(2)})` };
+}
 
 function getHeat(position: number, total: number): string {
   if (position <= 27) return "A";
@@ -55,7 +70,7 @@ export function StandingsTable({ competition }: Props) {
       </thead>
       <tbody>
         {standings.map((entry: StandingEntry, i: number) => (
-          <tr key={entry.driverId}>
+          <tr key={entry.driverId} style={getFreshnessStyle(entry.bestTimeAt)}>
             <td>{i + 1}</td>
             <td>{entry.driverName}</td>
             <td>{formatTime(entry.bestTime)}</td>

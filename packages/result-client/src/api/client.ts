@@ -16,6 +16,7 @@ export interface StandingEntry {
   driverName: string;
   bestTime: number;
   lapCount: number;
+  bestTimeAt: string;
 }
 
 export async function fetchCompetitions(): Promise<string[]> {

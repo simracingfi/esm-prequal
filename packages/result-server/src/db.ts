@@ -55,20 +55,28 @@ export async function getStandings(
 ): Promise<StandingEntry[]> {
   const { results } = await db
     .prepare(
-      `SELECT driver_id, driver_name, MIN(lap_time) as best_time, COUNT(*) as lap_count
-       FROM laptimes
-       WHERE competition = ? AND lap_time IS NOT NULL
-       GROUP BY driver_id
+      `SELECT l.driver_id, l.driver_name, l.lap_time as best_time,
+              sub.lap_count, MAX(l.created_at) as best_time_at
+       FROM laptimes l
+       JOIN (
+         SELECT driver_id, MIN(lap_time) as best_time, COUNT(*) as lap_count
+         FROM laptimes
+         WHERE competition = ? AND lap_time IS NOT NULL
+         GROUP BY driver_id
+       ) sub ON l.driver_id = sub.driver_id AND l.lap_time = sub.best_time
+       WHERE l.competition = ? AND l.lap_time IS NOT NULL
+       GROUP BY l.driver_id
        ORDER BY best_time ASC`
     )
-    .bind(competition)
-    .all<{ driver_id: number; driver_name: string; best_time: number; lap_count: number }>();
+    .bind(competition, competition)
+    .all<{ driver_id: number; driver_name: string; best_time: number; lap_count: number; best_time_at: string }>();
 
   return results.map((r) => ({
     driverId: r.driver_id,
     driverName: r.driver_name,
     bestTime: r.best_time,
     lapCount: r.lap_count,
+    bestTimeAt: r.best_time_at,
   }));
 }
 
