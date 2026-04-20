@@ -58,13 +58,13 @@ The `dist/` folder can be served from any static host. The recommended option is
 
 ### Cloudflare Pages (recommended)
 
-1. Push the repo to GitHub (already done).
-2. In the Cloudflare dashboard → **Pages** → **Create a project** → connect the repo.
+1. Push the repo to GitHub.
+2. In the Cloudflare dashboard → Compute → Worker & Pages → Create application → Pages (could be "Looking to deploy Pages? Get started" at the bottom) → connect the repo.
 3. Set the build configuration:
-   - **Framework preset**: None (or Vite)
+   - **Framework preset**: None
    - **Build command**: `npm run build`
    - **Build output directory**: `dist`
-   - **Root directory**: `packages/result-client`
+   - **Root directory (advanced)**: `packages/result-client`
 4. Add an environment variable:
    - `VITE_API_URL` = `https://esm-prequal-server.your-subdomain.workers.dev`
 5. Deploy. Cloudflare Pages automatically redeploys on every push to `main`.
