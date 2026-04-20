@@ -53,6 +53,8 @@ export async function getStandings(
   db: D1Database,
   competition: string
 ): Promise<StandingEntry[]> {
+  // Join condition includes lap_time IS NULL to include participated drivers with no valid laps.
+  // Results are ordered with NULLs (no time) last, and within non-NULLs by ascending time.
   const { results } = await db
     .prepare(
       `SELECT l.driver_id, l.driver_name, l.lap_time as best_time,
@@ -61,12 +63,16 @@ export async function getStandings(
        JOIN (
          SELECT driver_id, MIN(lap_time) as best_time, COUNT(*) as lap_count
          FROM laptimes
-         WHERE competition = ? AND lap_time IS NOT NULL
+         WHERE competition = ?
          GROUP BY driver_id
-       ) sub ON l.driver_id = sub.driver_id AND l.lap_time = sub.best_time
-       WHERE l.competition = ? AND l.lap_time IS NOT NULL
+       ) sub ON l.driver_id = sub.driver_id AND (
+                  l.lap_time = sub.best_time OR (
+                    l.lap_time IS NULL AND sub.best_time IS NULL
+                  )
+                )
+       WHERE l.competition = ?
        GROUP BY l.driver_id
-       ORDER BY best_time ASC`
+       ORDER BY best_time IS NULL ASC, best_time ASC`
     )
     .bind(competition, competition)
     .all<{ driver_id: number; driver_name: string; best_time: number; lap_count: number; best_time_at: string }>();

@@ -40,6 +40,11 @@ function getHeat(position: number, total: number): string {
   return "Ei erää";
 }
 
+function formatGapToBest(time: number, bestTime: number): string {
+  if (time === null || bestTime === null) return "-";
+  return `+${(time - bestTime).toFixed(3)}`;
+}
+
 interface Props {
   competition: string;
 }
@@ -74,7 +79,7 @@ export function StandingsTable({ competition }: Props) {
             <td>{i + 1}</td>
             <td>{entry.driverName}</td>
             <td>{formatTime(entry.bestTime)}</td>
-            <td>{i === 0 ? "-" : `+${(entry.bestTime - standings[0].bestTime).toFixed(3)}`}</td>
+            <td>{i === 0 ? "-" : formatGapToBest(entry.bestTime, standings[0].bestTime)}</td>
             <td>{getHeat(i + 1, standings.length)}</td>
           </tr>
         ))}

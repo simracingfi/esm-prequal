@@ -80,8 +80,6 @@ The Go and TypeScript packages are independent — there is no shared workspace 
 
 ## TODO
 
-- Highlight fresh times
-- Show drivers without time
 - Insert list of all drivers with null laptimes
 - Hardcode last season champion to position 27 (unless higher already)
 - Truncate decimals from times, don't round

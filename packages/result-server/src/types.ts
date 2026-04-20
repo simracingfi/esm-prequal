@@ -4,7 +4,7 @@ export const LaptimeSchema = z.object({
   driverId: z.number().int(),
   driverName: z.string().min(1),
   sessionId: z.number().int(),
-  lapNumber: z.number().int().min(0),
+  lapNumber: z.number().int(),
   lapTime: z.number().positive().nullable(),
 });
 
