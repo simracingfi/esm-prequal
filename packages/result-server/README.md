@@ -4,23 +4,19 @@ Cloudflare Workers REST API backed by D1 (SQLite). Receives lap time batches fro
 
 ## Requirements
 
-- Node.js 18+ ([nvm-windows](https://github.com/coreybutler/nvm-windows) Recommended)
+- Node.js 18+ ([nvm-windows](https://github.com/coreybutler/nvm-windows) Recommended for Windows)
 - A [Cloudflare account](https://dash.cloudflare.com/sign-up) (free tier is sufficient)
 - `wrangler` CLI (installed as a dev dependency)
 
 ## Setup
 
-### 1. Install dependencies
-
 ```sh
 npm install
-```
-
-### 2. Create the D1 database
-
-```sh
+# Create the D1 database
 npx wrangler d1 create esm-prequal-db
 ```
+
+### For Cloudflare Deployment
 
 Copy the `database_id` from the output and paste it into `wrangler.toml`:
 
@@ -31,7 +27,7 @@ database_name = "esm-prequal-db"
 database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"   # <-- replace this
 ```
 
-### 3. Set the API key secret
+Set the API key secret
 
 ```sh
 npx wrangler secret put API_KEY
@@ -87,24 +83,19 @@ curl "http://localhost:8787/api/competitions"
 
 ## Deployment
 
-### 1. Apply the migration to production
+Official deployment at https://esm-prequal-server.ttilus.workers.dev/. Continuous deployment configured in Cloudflare to automatically deploy master from https://github.com/simracingfi/esm-prequal. Admin tero.tilus@simracing.fi.
 
 ```sh
+# Apply the migration to production
 npm run db:migrate:remote
-```
-
-### 2. Deploy the Worker
-
-```sh
+# Deploy the Worker
 npm run deploy
 # or: npx wrangler deploy
 ```
 
 Wrangler prints the Worker URL (e.g. `https://esm-prequal-server.your-subdomain.workers.dev`).
 
-### 3. Set the production API key
-
-If not done already:
+Set the production API key
 
 ```sh
 npx wrangler secret put API_KEY

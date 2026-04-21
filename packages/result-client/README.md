@@ -1,22 +1,17 @@
 # result-client
 
-React single-page app that displays live qualifying standings. Polls the result server every 5 seconds and updates automatically — no page refresh required.
+React single-page app that displays live qualifying standings. Polls the result server and updates automatically.
 
 ## Requirements
 
-- Node.js 18+ ([nvm-windows](https://github.com/coreybutler/nvm-windows) Recommended)
-
-## Setup
-
-```sh
-npm install
-```
+- Node.js 18+ ([nvm-windows](https://github.com/coreybutler/nvm-windows) Recommended on Windows)
 
 ## Development
 
-Start the Vite dev server:
+Install dependencies and start the Vite dev server.  Connected to local `result-server` by default.
 
 ```sh
+npm install
 npm run dev
 ```
 
@@ -35,7 +30,7 @@ npm run dev
 Set `VITE_API_URL` to override the base URL:
 
 ```sh
-VITE_API_URL=https://esm-prequal-server.your-subdomain.workers.dev npm run dev
+VITE_API_URL=https://esm-prequal-server.ttilus.workers.dev npm run dev
 ```
 
 ## Build
@@ -55,6 +50,8 @@ npm run preview
 ## Deployment
 
 The `dist/` folder can be served from any static host. The recommended option is **Cloudflare Pages** (free tier), which co-locates the client with the Worker for minimal latency.
+
+Official deployment at https://esm-prequal.pages.dev/. Continuous deployment configured in Cloudflare to automatically deploy master from https://github.com/simracingfi/esm-prequal. Admin tero.tilus@simracing.fi.
 
 ### Cloudflare Pages (recommended)
 
@@ -79,7 +76,7 @@ Any host that can serve a `dist/` folder works (Netlify, Vercel, GitHub Pages, S
 2. Select a competition from the dropdown (populated automatically from the server).
 3. The **Standings** tab shows each driver's best valid lap, sorted fastest first, with gaps to P1.
 4. Switch to **All Laps** to see every recorded lap, including invalid ones.
-5. Both views refresh automatically every 5 seconds.
+5. Both views poll for updates and refresh automatically.
 
 ## Code Structure
 
@@ -89,6 +86,7 @@ src/
 ├── App.tsx                     # Competition picker and tab navigation
 ├── vite-env.d.ts               # Vite type declarations
 ├── api/
+│   ├── formatTime.tsx          # Laptime formatting for display
 │   └── client.ts               # Typed fetch wrappers for each endpoint
 ├── components/
 │   ├── CompetitionPicker.tsx   # Dropdown sourced from /api/competitions
@@ -97,7 +95,3 @@ src/
 └── hooks/
     └── usePolling.ts           # Generic polling hook (configurable interval)
 ```
-
-### Polling behaviour
-
-`usePolling(fetcher, intervalMs)` calls `fetcher` immediately on mount, then on a fixed interval. The hook returns `{ data, error, loading }`. Stale data is preserved while a refetch is in flight — the UI never flickers to a loading state after the first successful fetch.

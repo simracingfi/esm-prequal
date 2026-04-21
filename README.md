@@ -2,6 +2,8 @@
 
 A specialized iRacing live timing app for hotlap qualification competitions. Operators run a local timing loader alongside the iRacing simulator; results are pushed to a cloud API and displayed in real time on a web client.
 
+Official deployment at https://esm-prequal.pages.dev/
+
 ## Architecture
 
 ```
@@ -72,9 +74,9 @@ esm-prequal/
 
 The Go and TypeScript packages are independent — there is no shared workspace tooling. Dependencies are managed with `go mod` for the loader and `npm` for each TypeScript package.
 
-## Quick Start
+## Local Quick Start
 
-1. **Deploy the server** — see [`packages/result-server`](packages/result-server/README.md)
+1. **Start the server** — see [`packages/result-server`](packages/result-server/README.md)
 2. **Start the client** — see [`packages/result-client`](packages/result-client/README.md)
 3. **Run the loader on the race PC** — see [`packages/timing-loader-py`](packages/timing-loader-py/README.md)
 
