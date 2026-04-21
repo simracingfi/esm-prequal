@@ -6,25 +6,24 @@ Official deployment at https://esm-prequal.pages.dev/
 
 ## Architecture
 
-```
-┌─────────────────────────┐        ┌──────────────────────────────┐
-│   Windows PC / iRacing  │        │   Cloudflare Workers + D1    │
-│                         │        │                              │
-│  ┌───────────────────┐  │ HTTPS  │  ┌────────────────────────┐  │
-│  │  timing-loader    │──┼───────▶│  │    result-server       │  │
-│  │  (Python app)     │  │ POST   │  │    (Hono REST API)     │  │
-│  └───────────────────┘  │        │  └────────────────────────┘  │
-│                         │        │           │                  │
-└─────────────────────────┘        │    ┌──────▼──────┐           │
-                                   │    │  D1 SQLite  │           │
-┌─────────────────────────┐        │    └─────────────┘           │
-│   Browser / Any Device  │  HTTPS │                              │
-│                         │◀───────┼                              │
-│  ┌───────────────────┐  │  GET   │                              │
-│  │  result-client    │  │        └──────────────────────────────┘
-│  │  (React SPA)      │  │
-│  └───────────────────┘  │
-└─────────────────────────┘
+```mermaid
+graph LR
+    subgraph Browser["Browser / Any Device"]
+        client["result-client\n(React SPA)"]
+    end
+
+    subgraph CF["Cloudflare Workers + D1"]
+        server["result-server\n(Hono REST API)"]
+        db[("D1 SQLite")]
+        server --> db
+    end
+
+    subgraph PC["Windows PC / iRacing"]
+        loader["timing-loader\n(Python app)"]
+    end
+
+    client -- "HTTPS GET" --> server
+    loader -- "HTTPS POST" --> server
 ```
 
 ## Components
