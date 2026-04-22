@@ -1,6 +1,6 @@
 # eSM Prequal
 
-A specialized iRacing live timing app for hotlap qualification competitions. Operators run a local timing loader alongside the iRacing simulator; results are pushed to a cloud API and displayed in real time on a web client.
+A specialized iRacing live timing app for hotlap qualification competitions. Operators run a local timing loader alongside the iRacing simulator; results are pushed to a cloud API and displayed in real time on a web client. Hardcoded to implement eSM 2026 pre qualification heat split rules.
 
 Official deployment at https://esm-prequal.pages.dev/
 
@@ -36,7 +36,7 @@ graph LR
 
 ## Data Model
 
-One table: `laptimes`
+Main table: `laptimes`
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -49,6 +49,14 @@ One table: `laptimes`
 
 A `UNIQUE(driver_id, session_id, lap_number, competition)` constraint makes all batch uploads idempotent — duplicate records are silently ignored.
 
+Driver name overrides table: `drivers`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `driver_id` | integer | iRacing customer ID |
+| `driver_name` | text | Driver name to be used when listing drivers or inserting laptimes |
+
+
 ## API
 
 All routes are under `/api`. The POST route requires an `X-API-Key` header.
@@ -57,19 +65,17 @@ All routes are under `/api`. The POST route requires an `X-API-Key` header.
 |--------|------|------|-------------|
 | `POST` | `/api/laptimes` | API key | Upload a batch of lap times |
 | `GET` | `/api/competitions` | — | List distinct competition names |
+| `GET` | `/api/drivers` | — | List all drivers, obey driver name overrides |
 | `GET` | `/api/laptimes?competition=X` | — | All lap times for a competition |
 | `GET` | `/api/standings?competition=X` | — | Best valid lap per driver, sorted fastest-first |
 
 ## Monorepo Layout
 
-```
-esm-prequal/
-├── packages/
-│   ├── timing-loader-py/   # Laptime data collector (pyirsdk)
-│   ├── result-server/      # Laptime backend (Cloudflare Worker)
-│   └── result-client/      # Standings browser (Vite React SPA)
-└── .gitignore
-```
+| Path | Description |
+|------|-------------|
+| `packages/timing-loader-py/` | Laptime data collector (pyirsdk) |
+| `packages/result-server/` | Laptime backend (Cloudflare Worker) |
+| `packages/result-client/` | Standings browser (Vite React SPA) |
 
 The Go and TypeScript packages are independent — there is no shared workspace tooling. Dependencies are managed with `go mod` for the loader and `npm` for each TypeScript package.
 
@@ -81,11 +87,13 @@ The Go and TypeScript packages are independent — there is no shared workspace 
 
 ## TODO
 
-- Insert list of all drivers with null laptimes
 - Hardcode last season champion to position 27 (unless higher already)
-- Truncate decimals from times, don't round
 - FiSRA colors, fonts
 - Predict cutoff
+- Freeze results and store them in result-client repo
+- Annotate server, generate OpenAPI spec, serve developer portal
+- Unit tests
+- Generalize split to heats and former champion handling
 
 ## Known Issues
 

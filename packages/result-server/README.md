@@ -141,6 +141,22 @@ Duplicate laps (same `driverId + sessionId + lapNumber + competition`) are silen
 
 ---
 
+### `GET /api/drivers`
+
+**Response `200`:**
+```json
+{
+  "drivers": [
+    {
+      "driver_id": 123456,
+      "driver_name": "Alice Driver",
+    }
+  ]
+}
+```
+
+---
+
 ### `GET /api/laptimes?competition=X`
 
 **Response `200`:**
@@ -178,18 +194,3 @@ Returns each driver's single best valid lap, sorted fastest first.
 ```
 
 `lapCount` is the total number of laps (valid + invalid) recorded for the driver in that competition.
-
-## Code Structure
-
-```
-src/
-├── index.ts          # Hono app, CORS, auth middleware, route mounting
-├── db.ts             # D1 query helpers
-├── types.ts          # Zod schemas and TypeScript types
-└── routes/
-    ├── laptimes.ts   # POST and GET /api/laptimes
-    ├── competitions.ts  # GET /api/competitions
-    └── standings.ts  # GET /api/standings
-migrations/
-└── 0001_init.sql     # Creates laptimes table and indexes
-```

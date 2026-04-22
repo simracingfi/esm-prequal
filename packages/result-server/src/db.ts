@@ -1,10 +1,26 @@
 import type { Laptime, LaptimeRow, StandingEntry } from "./types";
 
+async function getDriverNameOverrides(
+  db: D1Database,
+  driverIds: number[]
+): Promise<Map<number, string>> {
+  if (driverIds.length === 0) return new Map();
+  const placeholders = driverIds.map(() => "?").join(", ");
+  const { results } = await db
+    .prepare(`SELECT driver_id, driver_name FROM drivers WHERE driver_id IN (${placeholders})`)
+    .bind(...driverIds)
+    .all<{ driver_id: number; driver_name: string }>();
+  return new Map(results.map((r) => [r.driver_id, r.driver_name]));
+}
+
 export async function insertLaptimes(
   db: D1Database,
   competition: string,
   laptimes: Laptime[]
 ): Promise<number> {
+  const uniqueIds = [...new Set(laptimes.map((lt) => lt.driverId))];
+  const overrides = await getDriverNameOverrides(db, uniqueIds);
+
   const stmt = db.prepare(
     `INSERT OR IGNORE INTO laptimes (driver_id, driver_name, session_id, competition, lap_number, lap_time)
      VALUES (?, ?, ?, ?, ?, ?)`
@@ -13,7 +29,7 @@ export async function insertLaptimes(
   const batch = laptimes.map((lt) =>
     stmt.bind(
       lt.driverId,
-      lt.driverName,
+      overrides.get(lt.driverId) ?? lt.driverName,
       lt.sessionId,
       competition,
       lt.lapNumber,
@@ -84,6 +100,25 @@ export async function getStandings(
     lapCount: r.lap_count,
     bestTimeAt: r.best_time_at,
   }));
+}
+
+export async function getDrivers(
+  db: D1Database
+): Promise<{ driverId: number; driverName: string }[]> {
+  // Latest name from laptimes, overridden by drivers table when present
+  const { results } = await db
+    .prepare(
+      `SELECT COALESCE(d.driver_id, l.driver_id) AS driver_id, COALESCE(d.driver_name, l.driver_name) AS driver_name
+       FROM (
+         SELECT driver_id, driver_name
+         FROM laptimes
+         WHERE id IN (SELECT MAX(id) FROM laptimes GROUP BY driver_id)
+       ) l
+       FULL OUTER JOIN drivers d ON d.driver_id = l.driver_id
+       ORDER BY driver_name ASC`
+    )
+    .all<{ driver_id: number; driver_name: string }>();
+  return results.map((r) => ({ driverId: r.driver_id, driverName: r.driver_name }));
 }
 
 export async function getSessions(

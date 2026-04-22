@@ -4,6 +4,7 @@ import type { Env } from "./types";
 import laptimesRoutes from "./routes/laptimes";
 import competitionsRoutes from "./routes/competitions";
 import standingsRoutes from "./routes/standings";
+import driversRoutes from "./routes/drivers";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -23,6 +24,7 @@ app.use("/api/laptimes", async (c, next) => {
 app.route("/api/laptimes", laptimesRoutes);
 app.route("/api/competitions", competitionsRoutes);
 app.route("/api/standings", standingsRoutes);
+app.route("/api/drivers", driversRoutes);
 
 app.get("/", (c) => {
   return c.json({ name: "eSM Prequal Result Server", status: "ok" });

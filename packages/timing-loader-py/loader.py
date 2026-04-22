@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import sys
 import time
 import urllib.request
 import urllib.error
@@ -14,7 +15,75 @@ def parse_args():
     p.add_argument("--server", default="http://localhost:8787", help="Result server URL")
     p.add_argument("--apikey", required=True, help="API key for server authentication")
     p.add_argument("--interval", type=int, default=10, help="Polling interval in seconds")
+    p.add_argument(
+        "--enroll", nargs="?", const="-", metavar="FILE",
+        help="Enroll drivers from FILE (or stdin when omitted); sends null lap times and exits",
+    )
     return p.parse_args()
+
+
+def parse_enrollment_input(text):
+    """Extract driver names from a tab-separated enrollment table.
+    Copy-paste from https://simracing.fi/ season or race driver list works as-is.
+
+    Each row: [optional_number TAB] driver_name [TAB team [TAB car]]
+    """
+    names = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        fields = line.split("\t")
+        name = fields[1].strip() if fields[0].strip().isdigit() else fields[0].strip()
+        if name:
+            names.append(name)
+    return names
+
+
+def load_driver_ids(server_url):
+    """Fetch driver name -> iRacing ID mapping from result-server GET /api/drivers."""
+    req = urllib.request.Request(
+        url=f"{server_url}/api/drivers",
+        headers={"User-Agent": "eSM Prequal Timing Loader/1.0"},
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read())
+    return {d["driverName"]: d["driverId"] for d in data.get("drivers", [])}
+
+
+def enroll_drivers(args):
+    """Send a null-laptime record for every enrolled driver, then exit."""
+    if args.enroll == "-":
+        text = sys.stdin.read()
+    else:
+        with open(args.enroll, encoding="utf-8") as f:
+            text = f.read()
+
+    names = parse_enrollment_input(text)
+    driver_ids = load_driver_ids(args.server)
+
+    laptimes = []
+    missing = []
+    for name in names:
+        driver_id = driver_ids.get(name)
+        if driver_id is None:
+            missing.append(name)
+        else:
+            laptimes.append({
+                "driverId": driver_id,
+                "driverName": name,
+                "sessionId": 0,
+                "lapNumber": -1,
+                "lapTime": None,
+            })
+
+    if missing:
+        print(f"Warning: no ID found for: {', '.join(missing)}")
+
+    if laptimes:
+        send_batch(args.server, args.apikey, args.competition, laptimes)
+    else:
+        print("No drivers enrolled.")
 
 
 def send_batch(server_url, api_key, competition, laptimes):
@@ -121,8 +190,12 @@ def main():
     print(f"eSM Prequal Timing Loader")
     print(f"Competition: {args.competition}")
     print(f"Server: {args.server}")
-    print(f"Interval: {args.interval}s")
 
+    if args.enroll is not None:
+        enroll_drivers(args)
+        return
+
+    print(f"Interval: {args.interval}s")
     ir = irsdk.IRSDK()
     sent = set()  # (driverId, sessionId, lapNumber) tuples
 

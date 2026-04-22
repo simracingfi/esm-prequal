@@ -4,7 +4,6 @@ node_modules/
 # Build output
 dist/
 *.exe
-packages/timing-loader/timing-loader
 
 # Environment & secrets
 .env
@@ -28,3 +27,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Working files
+*.log
+tmp/
