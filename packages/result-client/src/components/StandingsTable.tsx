@@ -18,7 +18,9 @@ const FLAG_DESCRIPTIONS = {
 function getFreshnessStyle(bestTimeAt: string | undefined): CSSProperties {
   if (!bestTimeAt) return {};
   // SQLite stores timestamps as "YYYY-MM-DD HH:MM:SS" (UTC); browsers need ISO 8601 with T+Z
-  const isoStr = bestTimeAt.includes("T") ? bestTimeAt : bestTimeAt.replace(" ", "T") + "Z";
+  const isoStr = bestTimeAt.includes("T")
+    ? bestTimeAt
+    : bestTimeAt.replace(" ", "T") + "Z";
   const ageSeconds = (Date.now() - new Date(isoStr).getTime()) / 1000;
   const MAX_AGE = 3600; // 1 hour → no highlight
   const PEAK_AGE = 120; // 2 minutes → full highlight
@@ -27,7 +29,9 @@ function getFreshnessStyle(bestTimeAt: string | undefined): CSSProperties {
     ageSeconds <= PEAK_AGE
       ? 1
       : 1 - (ageSeconds - PEAK_AGE) / (MAX_AGE - PEAK_AGE);
-  return { backgroundColor: `rgba(51, 122, 183, ${(intensity * 0.5).toFixed(2)})` };
+  return {
+    backgroundColor: `rgba(51, 122, 183, ${(intensity * 0.5).toFixed(2)})`,
+  };
 }
 
 function getHeat(position: number, total: number): string {
@@ -62,10 +66,7 @@ interface Props {
 }
 
 export function StandingsTable({ competition }: Props) {
-  const fetcher = useCallback(
-    () => fetchStandings(competition),
-    [competition]
-  );
+  const fetcher = useCallback(() => fetchStandings(competition), [competition]);
   const { data: standings, loading, error } = usePolling(fetcher);
 
   if (loading) return <div>Ladataan tuloksia...</div>;
@@ -92,7 +93,14 @@ export function StandingsTable({ competition }: Props) {
             <td>{i + 1}</td>
             <td>
               {entry.driverName}
-              {entry.defendingChampion && <span title="Puolustava mestari" style={{ color: "gold", marginLeft: "5px" }}>🏆</span>}
+              {entry.defendingChampion && (
+                <span
+                  title="Puolustava mestari"
+                  style={{ color: "gold", marginLeft: "5px" }}
+                >
+                  🏆
+                </span>
+              )}
             </td>
             <td>{formatTime(entry.bestTime)}</td>
             <td title={entry.flag ? FLAG_DESCRIPTIONS[entry.flag] : ""}>
