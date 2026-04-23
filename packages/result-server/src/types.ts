@@ -30,9 +30,10 @@ export interface LaptimeRow {
 export interface StandingEntry {
   driverId: number;
   driverName: string;
-  bestTime: number;
+  bestTime: number | null;
   lapCount: number;
   bestTimeAt: string;
+  defendingChampion?: boolean;
 }
 
 export interface Env {

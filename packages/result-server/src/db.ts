@@ -1,5 +1,9 @@
 import type { Laptime, LaptimeRow, StandingEntry } from "./types";
 
+const DEFENDING_CHAMPION = { driverId: 222130, driverName: "Matti Kaidesoja" };
+const DEFENDING_CHAMPION_MAX_INDEX = 26;
+
+
 async function getDriverNameOverrides(
   db: D1Database,
   driverIds: number[]
@@ -91,15 +95,40 @@ export async function getStandings(
        ORDER BY best_time IS NULL ASC, best_time ASC`
     )
     .bind(competition, competition)
-    .all<{ driver_id: number; driver_name: string; best_time: number; lap_count: number; best_time_at: string }>();
+    .all<{ driver_id: number; driver_name: string; best_time: number | null; lap_count: number; best_time_at: string }>();
 
-  return results.map((r) => ({
+  const standings: StandingEntry[] = results.map((r) => ({
     driverId: r.driver_id,
     driverName: r.driver_name,
     bestTime: r.best_time,
     lapCount: r.lap_count,
     bestTimeAt: r.best_time_at,
   }));
+
+  // Enforce defending champion at position ≤ 27 (index 26)
+  const champIdx = standings.findIndex((s) => s.driverId === DEFENDING_CHAMPION.driverId);
+
+  if (champIdx === -1) {
+    // Not in standings, add entry at max index or the end if standings list is shorter.
+    standings.splice(Math.min(DEFENDING_CHAMPION_MAX_INDEX, standings.length), 0, {
+      driverId: DEFENDING_CHAMPION.driverId,
+      driverName: DEFENDING_CHAMPION.driverName,
+      bestTime: null,
+      lapCount: 0,
+      bestTimeAt: "",
+      defendingChampion: true,
+    });
+  } else if (champIdx > DEFENDING_CHAMPION_MAX_INDEX) {
+    // Move up to max index and tag as champ.
+    const [champ] = standings.splice(champIdx, 1);
+    champ.defendingChampion = true;
+    standings.splice(DEFENDING_CHAMPION_MAX_INDEX, 0, champ);
+  } else {
+    // Already high enough, just tag the champ.
+    standings[champIdx].defendingChampion = true;
+  }
+
+  return standings;
 }
 
 export async function getDrivers(

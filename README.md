@@ -87,7 +87,7 @@ The Go and TypeScript packages are independent — there is no shared workspace 
 
 ## TODO
 
-- Hardcode last season champion to position 27 (unless higher already)
+- Standings including chequered flag status (last lap number = 4) and show checkquered in client
 - FiSRA colors, fonts
 - Predict cutoff
 - Freeze results and store them in result-client repo

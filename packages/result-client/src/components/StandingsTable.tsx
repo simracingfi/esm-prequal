@@ -77,7 +77,10 @@ export function StandingsTable({ competition }: Props) {
         {standings.map((entry: StandingEntry, i: number) => (
           <tr key={entry.driverId} style={getFreshnessStyle(entry.bestTimeAt)}>
             <td>{i + 1}</td>
-            <td>{entry.driverName}</td>
+            <td>
+              {entry.driverName}
+              {entry.defendingChampion && <span title="Puolustava mestari" style={{ color: "gold", marginLeft: "5px" }}>🏆</span>}
+            </td>
             <td>{formatTime(entry.bestTime)}</td>
             <td>{i === 0 ? "-" : formatGapToBest(entry.bestTime, standings[0].bestTime)}</td>
             <td>{getHeat(i + 1, standings.length)}</td>
