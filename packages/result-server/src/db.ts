@@ -78,10 +78,11 @@ export async function getStandings(
   const { results } = await db
     .prepare(
       `SELECT l.driver_id, l.driver_name, l.lap_time as best_time,
-              sub.lap_count, MAX(l.created_at) as best_time_at
+              sub.lap_count, sub.max_lap, MAX(l.created_at) as best_time_at
        FROM laptimes l
        JOIN (
-         SELECT driver_id, MIN(lap_time) as best_time, COUNT(*) as lap_count
+         SELECT driver_id, MIN(lap_time) as best_time, COUNT(*) as lap_count,
+                MAX(CASE WHEN lap_number > 0 THEN lap_number END) as max_lap
          FROM laptimes
          WHERE competition = ?
          GROUP BY driver_id
@@ -95,7 +96,7 @@ export async function getStandings(
        ORDER BY best_time IS NULL ASC, best_time ASC`
     )
     .bind(competition, competition)
-    .all<{ driver_id: number; driver_name: string; best_time: number | null; lap_count: number; best_time_at: string }>();
+    .all<{ driver_id: number; driver_name: string; best_time: number | null; lap_count: number; max_lap: number | null; best_time_at: string }>();
 
   const standings: StandingEntry[] = results.map((r) => ({
     driverId: r.driver_id,
@@ -103,6 +104,10 @@ export async function getStandings(
     bestTime: r.best_time,
     lapCount: r.lap_count,
     bestTimeAt: r.best_time_at,
+    flag: r.max_lap == null ? null
+        : r.max_lap >= 4   ? "chequered"
+        : r.max_lap === 3  ? "white"
+        :                    "green",
   }));
 
   // Enforce defending champion at position ≤ 27 (index 26)
@@ -116,6 +121,7 @@ export async function getStandings(
       bestTime: null,
       lapCount: 0,
       bestTimeAt: "",
+      flag: null,
       defendingChampion: true,
     });
   } else if (champIdx > DEFENDING_CHAMPION_MAX_INDEX) {

@@ -87,8 +87,8 @@ The Go and TypeScript packages are independent — there is no shared workspace 
 
 ## TODO
 
-- Standings including chequered flag status (last lap number = 4) and show checkquered in client
 - FiSRA colors, fonts
+- Visually represent gap to the top with bar in the delta column background
 - Predict cutoff
 - Freeze results and store them in result-client repo
 - Annotate server, generate OpenAPI spec, serve developer portal

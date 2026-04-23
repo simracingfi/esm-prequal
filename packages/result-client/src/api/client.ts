@@ -17,6 +17,7 @@ export interface StandingEntry {
   bestTime: number | null;
   lapCount: number;
   bestTimeAt: string;
+  flag: "chequered" | "green" | "white" | null;
   defendingChampion?: boolean;
 }
 

@@ -3,6 +3,18 @@ import { fetchStandings, type StandingEntry } from "../api/client";
 import { usePolling } from "../hooks/usePolling";
 import { formatTime } from "../api/formatTime";
 
+const FLAG_EMOJIS = {
+  chequered: "🏁",
+  green: "🟢",
+  white: "🏳️",
+};
+
+const FLAG_DESCRIPTIONS = {
+  chequered: "Kaikki kierrokset ajettu, ruutulippu",
+  green: "Ajo alkanut, vihreä lippu",
+  white: "Viimeinen kierros, valkoinen lippu",
+};
+
 function getFreshnessStyle(bestTimeAt: string | undefined): CSSProperties {
   if (!bestTimeAt) return {};
   // SQLite stores timestamps as "YYYY-MM-DD HH:MM:SS" (UTC); browsers need ISO 8601 with T+Z
@@ -40,7 +52,7 @@ function getHeat(position: number, total: number): string {
   return "Ei erää";
 }
 
-function formatGapToBest(time: number, bestTime: number): string {
+function formatGapToBest(time: number | null, bestTime: number | null): string {
   if (time === null || bestTime === null) return "-";
   return `+${(time - bestTime).toFixed(3)}`;
 }
@@ -69,6 +81,7 @@ export function StandingsTable({ competition }: Props) {
           <th>Sija</th>
           <th>Kuljettaja</th>
           <th>Paras aika</th>
+          <th></th>
           <th>Ero kärkeen</th>
           <th>Erä</th>
         </tr>
@@ -82,7 +95,14 @@ export function StandingsTable({ competition }: Props) {
               {entry.defendingChampion && <span title="Puolustava mestari" style={{ color: "gold", marginLeft: "5px" }}>🏆</span>}
             </td>
             <td>{formatTime(entry.bestTime)}</td>
-            <td>{i === 0 ? "-" : formatGapToBest(entry.bestTime, standings[0].bestTime)}</td>
+            <td title={entry.flag ? FLAG_DESCRIPTIONS[entry.flag] : ""}>
+              {entry.flag ? FLAG_EMOJIS[entry.flag] : ""}
+            </td>
+            <td>
+              {i === 0
+                ? "-"
+                : formatGapToBest(entry.bestTime, standings[0].bestTime)}
+            </td>
             <td>{getHeat(i + 1, standings.length)}</td>
           </tr>
         ))}
