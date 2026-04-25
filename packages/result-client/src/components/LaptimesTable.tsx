@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { fetchLaptimes, type LaptimeRow } from "../api/client";
 import { usePolling } from "../hooks/usePolling";
-import { formatTime } from "../api/formatTime";
+import { formatTime } from "../utils/formatTime";
 
 interface Props {
   competition: string;

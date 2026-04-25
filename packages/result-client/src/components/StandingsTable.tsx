@@ -1,7 +1,9 @@
 import { useCallback, type CSSProperties } from "react";
 import { fetchStandings, type StandingEntry } from "../api/client";
 import { usePolling } from "../hooks/usePolling";
-import { formatTime } from "../api/formatTime";
+import { formatTime } from "../utils/formatTime";
+import { formatGapToBest } from "../utils/formatGapToBest";
+import { getHeat } from "../utils/getHeat";
 
 const FLAG_EMOJIS = {
   chequered: "🏁",
@@ -15,16 +17,21 @@ const FLAG_DESCRIPTIONS = {
   white: "Viimeinen kierros, valkoinen lippu",
 };
 
-function getFreshnessStyle(bestTimeAt: string | undefined): CSSProperties {
-  if (!bestTimeAt) return {};
-  // SQLite stores timestamps as "YYYY-MM-DD HH:MM:SS" (UTC); browsers need ISO 8601 with T+Z
+function toAgeSeconds(bestTimeAt: string | undefined): number | null {
+  if (!bestTimeAt) return null;
   const isoStr = bestTimeAt.includes("T")
     ? bestTimeAt
     : bestTimeAt.replace(" ", "T") + "Z";
-  const ageSeconds = (Date.now() - new Date(isoStr).getTime()) / 1000;
+  return (Date.now() - new Date(isoStr).getTime()) / 1000;
+}
+
+function getFreshnessStyle(bestTimeAt: string | undefined): CSSProperties {
+  if (!bestTimeAt) return {};
+
+  const ageSeconds = toAgeSeconds(bestTimeAt);
   const MAX_AGE = 3600; // 1 hour → no highlight
   const PEAK_AGE = 120; // 2 minutes → full highlight
-  if (ageSeconds > MAX_AGE) return {};
+  if (ageSeconds === null || ageSeconds > MAX_AGE) return {};
   const intensity =
     ageSeconds <= PEAK_AGE
       ? 1
@@ -32,33 +39,6 @@ function getFreshnessStyle(bestTimeAt: string | undefined): CSSProperties {
   return {
     backgroundColor: `rgba(51, 122, 183, ${(intensity * 0.5).toFixed(2)})`,
   };
-}
-
-function getHeat(position: number, total: number): string {
-  if (position <= 27) return "A";
-
-  const R = total - 27;
-  const p = position - 27; // 1-indexed within drivers after group A
-
-  if (R <= 25) {
-    return "B";
-  } else if (R <= 47) {
-    // B (intermediate) + C (last), equal race sizes
-    const qB = Math.floor((R - 3) / 2);
-    return p <= qB ? "B" : "C";
-  } else if (R <= 69) {
-    // B, C (intermediate) + D (last), equal race sizes
-    const q = Math.floor((R - 3) / 3);
-    if (p <= q) return "B";
-    if (p <= 2 * q) return "C";
-    return "D";
-  }
-  return "Ei erää";
-}
-
-function formatGapToBest(time: number | null, bestTime: number | null): string {
-  if (time === null || bestTime === null) return "-";
-  return `+${(time - bestTime).toFixed(3)}`;
 }
 
 interface Props {
