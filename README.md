@@ -34,29 +34,6 @@ graph LR
 | [`packages/result-server`](packages/result-server/) | TypeScript | Laptime backend, a Cloudflare Workers REST API with D1 (SQLite) storage |
 | [`packages/result-client`](packages/result-client/) | TypeScript / React | Single-page app that polls the server and displays live standings |
 
-## Data Model
-
-Main table: `laptimes`
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `driver_id` | integer | iRacing customer ID |
-| `driver_name` | text | iRacing profile name |
-| `session_id` | integer | iRacing subsession ID |
-| `competition` | text | Qualification event name (set when starting the loader) |
-| `lap_number` | integer | iRacing-reported lap number |
-| `lap_time` | real / NULL | Lap time in seconds; NULL if the lap was invalid (e.g. track limits) |
-
-A `UNIQUE(driver_id, session_id, lap_number, competition)` constraint makes all batch uploads idempotent — duplicate records are silently ignored.
-
-Driver name overrides table: `drivers`
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `driver_id` | integer | iRacing customer ID |
-| `driver_name` | text | Driver name to be used when listing drivers or inserting laptimes |
-
-
 ## API
 
 All routes are under `/api`. The POST route requires an `X-API-Key` header.
@@ -73,11 +50,11 @@ All routes are under `/api`. The POST route requires an `X-API-Key` header.
 
 | Path | Description |
 |------|-------------|
-| `packages/timing-loader-py/` | Laptime data collector (pyirsdk) |
-| `packages/result-server/` | Laptime backend (Cloudflare Worker) |
-| `packages/result-client/` | Standings browser (Vite React SPA) |
+| `packages/timing-loader-py/` | Laptime data collector (Python, pyirsdk) |
+| `packages/result-server/` | Laptime backend (TypeScript, Cloudflare Worker, D1) |
+| `packages/result-client/` | Standings browser (TypeScript, React) |
 
-The Go and TypeScript packages are independent — there is no shared workspace tooling. Dependencies are managed with `go mod` for the loader and `npm` for each TypeScript package.
+Packages are independent. There is no shared workspace tooling. Dependencies are managed individually.
 
 ## Local Quick Start
 
@@ -94,7 +71,3 @@ The Go and TypeScript packages are independent — there is no shared workspace 
 - Freeze results and store them in result-client repo
 - Annotate server, generate OpenAPI spec, serve developer portal
 - Generalize split to heats and former champion handling
-
-## Known Issues
-
-- Live collected results from timing-loader-py repeat the best laptime so far if laptime didn't improve. Looks like this could be a bug in iRacing SDK.

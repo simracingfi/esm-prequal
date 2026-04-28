@@ -101,6 +101,28 @@ Set the production API key
 npx wrangler secret put API_KEY
 ```
 
+## Data Model
+
+Main table: `laptimes`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `driver_id` | integer | iRacing customer ID |
+| `driver_name` | text | iRacing profile name |
+| `session_id` | integer | iRacing subsession ID |
+| `competition` | text | Qualification event name (set when starting the loader) |
+| `lap_number` | integer | iRacing-reported lap number |
+| `lap_time` | real / NULL | Lap time in seconds; NULL if the lap was invalid (e.g. track limits) |
+
+A `UNIQUE(driver_id, session_id, lap_number, competition)` constraint makes all batch uploads idempotent — duplicate records are silently ignored.
+
+Driver name overrides table: `drivers`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `driver_id` | integer | iRacing customer ID |
+| `driver_name` | text | Driver name to be used when listing drivers or inserting laptimes |
+
 ## API Reference
 
 ### `POST /api/laptimes`
