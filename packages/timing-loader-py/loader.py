@@ -197,7 +197,8 @@ def main():
 
     print(f"Interval: {args.interval}s")
     ir = irsdk.IRSDK()
-    sent = set()  # (driverId, sessionId, lapNumber) tuples
+    sent = set()    # (driverId, sessionId, lapNumber) tuples already uploaded
+    pending = {}    # key -> laptime dict; held one cycle so LastLapTime can settle
 
     print("Waiting for iRacing connection...")
     while True:
@@ -223,16 +224,24 @@ def main():
             if not laptimes:
                 print("No active laps in telemetry")
 
-            new_laps = []
+            ready_laps = []
+            next_pending = {}
             for lt in laptimes:
                 key = (lt["driverId"], lt["sessionId"], lt["lapNumber"])
-                if key not in sent:
-                    new_laps.append(lt)
+                if key in sent:
+                    continue
+                if key in pending:
+                    # Seen for a second cycle — LastLapTime has had time to settle
+                    ready_laps.append(lt)
+                else:
+                    next_pending[key] = lt
 
-            if new_laps:
+            pending = next_pending  # keys not in current poll are implicitly dropped
+
+            if ready_laps:
                 try:
-                    send_batch(args.server, args.apikey, args.competition, new_laps)
-                    for lt in new_laps:
+                    send_batch(args.server, args.apikey, args.competition, ready_laps)
+                    for lt in ready_laps:
                         sent.add((lt["driverId"], lt["sessionId"], lt["lapNumber"]))
                 except (urllib.error.URLError, OSError) as e:
                     print(f"Error sending batch: {e}")
