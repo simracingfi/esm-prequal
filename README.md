@@ -61,13 +61,3 @@ Packages are independent. There is no shared workspace tooling. Dependencies are
 1. **Start the server** — see [`packages/result-server`](packages/result-server/README.md)
 2. **Start the client** — see [`packages/result-client`](packages/result-client/README.md)
 3. **Run the loader on the race PC** — see [`packages/timing-loader-py`](packages/timing-loader-py/README.md)
-
-## TODO
-
-- Automatically close all started drives after a threshold period
-- FiSRA colors, fonts
-- Visually represent gap to the top with bar in the delta column background
-- Predict cutoff
-- Freeze results and store them in result-client repo
-- Annotate server, generate OpenAPI spec, serve developer portal
-- Generalize split to heats and former champion handling
